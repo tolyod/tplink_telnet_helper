@@ -1,45 +1,10 @@
 <?php
 
-
-        include_once("lib/Net_Telnet/Net/Telnet.php");
-        
-        $router='10.22.0.134';
-        
-        function get_tplink_login_first_arr ($password) {
-         return array(
-             'login_prompt'  => 'User:',
-             'login_success' => '',
-             'login_fail'    => 'Login invalid',
-             'login'         => 'admin',
-             'password_prompt'   =>  'Password:',
-             'password'      => $password,
-             'prompt'        => ">",
-             'debug'         => false,
-             );
-        }
-        
-        function get_tplink_login_enable_arr($enable_secret) {
-          return array(
-                 'login_prompt'  => '',
-                 'login_success' => '',  // reset from previous call
-                 'password'      => $enable_secret,
-                 'password_prompt' => 'Password:',
-                 'prompt'        => "#",
-                 'debug'         => true,
-                 );
-        }
-        
-        function get_tplink_connect_init_arr ($router) {
-          return array ('host'        => $router,
-                        'telnet_bugs' => false,
-                        'debug'         => false,
-                        );
-        }
         
         function get_tplink_running_config ($router) {
         
-        $password='admin18';
-        $enable_secret='admin18';
+        $password=get_login_password();
+        $enable_secret=get_enable_password();
 
         
         $login_first = get_tplink_login_first_arr($password);
@@ -81,9 +46,9 @@
       }
       
       function get_tplink_mac_addresses_raw_str ($router) {
-        $password='admin18';
-        $enable_secret='admin18';
-
+        $password=get_login_password();
+        $enable_secret=get_enable_password();
+               
         $login_first = get_tplink_login_first_arr($password);
         $login_enable = get_tplink_login_enable_arr($enable_secret);
         $init_arr = get_tplink_connect_init_arr($router);                
@@ -104,7 +69,7 @@
          $t->login($login_enable);
     
          $switch_name = array_reduce(explode("\n",$t->cmd("show system-info")),function ($acc, $item) {
-           if(preg_match("/^[\s]{0,}System Name[\s]{0,}-[\s]{0,}([\w-]{0,})[\s]{0,}\$/i",$item, $matched)) {
+           if(preg_match("/^[\s]{0,}System Name[\s]{0,}-[\s]{0,}([0-9a-z\.-]{0,})[\s]{0,}\$/i",$item, $matched)) {
              $acc = $matched[1];
            }
            return $acc;
@@ -123,8 +88,10 @@
        }
 
        function get_tplink_sys_info ($router) {
-        $password='admin18';
-        $enable_secret='admin18';
+        
+        $password=get_login_password();
+        $enable_secret=get_enable_password();
+                       
 
         $login_first = get_tplink_login_first_arr($password);
         $login_enable = get_tplink_login_enable_arr($enable_secret);
@@ -165,9 +132,10 @@
        }
 
        function get_tplink_ports_arr ($router) {
-        $password='admin18';
-        $enable_secret='admin18';
-
+       
+        $password=get_login_password();
+        $enable_secret=get_enable_password();
+                       
         $login_first = get_tplink_login_first_arr($password);
         $login_enable = get_tplink_login_enable_arr($enable_secret);
         $init_arr = get_tplink_connect_init_arr($router);
@@ -240,9 +208,9 @@
        
        function get_tplink_port_macs($router, $portNum) {
         
-         
-        $password='admin18';
-        $enable_secret='admin18';					
+        $password=get_login_password();
+        $enable_secret=get_enable_password();
+                       
 
         $login_first = get_tplink_login_first_arr($password);
         $login_enable = get_tplink_login_enable_arr($enable_secret);
@@ -286,14 +254,4 @@
          return convert_tplink_mac_long_string_to_arr($fdb);
        }
                            
-
-//echo "----- ".$switch_name." ----- \n";
-//var_dump(get_tplink_running_config($router));
-//var_dump(get_tplink_mac_addresses_raw_str($router));
-//var_dump(get_tplink_sys_info($router));
-//var_dump(get_tplink_ports_arr($router));
-//var_dump(get_tplink_port_short_name($router, 3));
-var_dump(get_tplink_port_macs($router, 1));
-exit();
-
 ?>
